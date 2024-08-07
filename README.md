@@ -4,7 +4,7 @@ Docker image for building MongoDB databases using the `Mongo-Initializr` scripts
 
 ## Docker image
 
-By default the database is initialized on startup of the container using the [docker_entrypoint_mi.sh](docker/docker_entrypoint_mi.sh) script. The behavior of this script can be customized based on the `MI_*`-variables.
+By default the database is initialized on startup of the container using the [docker-entrypoint.sh](docker/docker-entrypoint.sh) script. The behavior of this script can be customized based on the `MI_*`-variables.
 
 ### Variables
 
@@ -21,7 +21,7 @@ By default the database is initialized on startup of the container using the [do
 * `MI_SKIP_BIN_FOLDER_CLEANUP`: Set to `true` if the bin-folder should be kept.
 * `MI_SKIP_SOURCE_FOLDER_CLEANUP`: Set to `true` if the source-folder should be kept.
 * `MI_SKIP_DBDATA_FOLDER_CLEANUP`: Set to `true` if the dbdata-folder should be kept.
-* `MI_SKIP_UNSET_ENVS`: Set to `true` if all the `MI_*` environment variables should be kept after the `docker_entrypoint_mi.sh` entrypoint script is runned.
+* `MI_SKIP_UNSET_ENVS`: Set to `true` if all the `MI_*` environment variables should be kept after the `docker-entrypoint.sh` entrypoint script is runned.
 * `HTTPS_DATA_USERNAME`, `HTTPS_DATA_PASSWORD`: The username and password of the nexus repository used for syncing the dbdata-files.
 
 ### Examples of how to use the aerius-mongo-initializr image
@@ -60,28 +60,35 @@ docker run \
 
 <br>
 
-Example-project Dockerfile where the `MI_INPUT_FILE` and `MI_RUN_SCRIPT_FOLDER` variables are specified and the database source is copied.
+Example-project Dockerfile where a default `MI_INPUT_FILE` and `MI_RUN_SCRIPT_FOLDER` value is specified, the database source is copied and the `Mongo-Initializr` is executed to initialize the database during the Docker build fase.
 ```bash
 FROM aerius-mongo-initializr:0.1-SNAPSHOT-7.0.6
 
-ENV MI_INPUT_FILE="/source/example-project/src/data/initdb.json" \
-    MI_RUN_SCRIPT_FOLDER="/source/example-project/src/main"
+ARG MI_DATABASE_NAME
+ARG MI_DATABASE_USERNAME
+ARG MI_DATABASE_PASSWORD
+ARG MI_DATABASE_VERSION
+ARG MI_INPUT_FILE
+ARG MI_RUN_SCRIPT_FOLDER
+ARG MI_NEXUS_BASE_URL
+ARG MI_NEXUS_REPOSITORY
+ARG MI_BIN_FOLDER
+ARG MI_SOURCE_FOLDER
+ARG MI_DBDATA_FOLDER
+ARG MI_SKIP_DBDATA_SYNC
+ARG MI_SKIP_BIN_FOLDER_CLEANUP
+ARG MI_SKIP_SOURCE_FOLDER_CLEANUP
+ARG MI_SKIP_DBDATA_FOLDER_CLEANUP
+ARG MI_SKIP_UNSET_ENVS
+ARG HTTPS_DATA_USERNAME
+ARG HTTPS_DATA_PASSWORD
+
+ENV MI_INPUT_FILE=${MI_INPUT_FILE:-"/source/example-project/src/data/initdb.json"} \
+    MI_RUN_SCRIPT_FOLDER=${MI_RUN_SCRIPT_FOLDER:-"/source/example-project/src/main"}
 
 COPY ./source ${MI_SOURCE_FOLDER}
-```
 
-<br>
-
-Example how to initialize the database during the Docker build fase.
-```bash
-FROM aerius-mongo-initializr:0.1-SNAPSHOT-7.0.6
-
-ENV MI_INPUT_FILE="/source/example-project/src/data/initdb.json" \
-    MI_RUN_SCRIPT_FOLDER="/source/example-project/src/main"
-
-COPY ./source ${MI_SOURCE_FOLDER}
-
-RUN /docker_entripoint_mi.sh
+RUN /mongo-initializr.sh
 ```
 
 ## Image build
