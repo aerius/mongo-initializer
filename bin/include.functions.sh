@@ -14,10 +14,10 @@ _log() {
 
 # Helper function to call mongoimport
 _mongoimport() { 
-    mongoimport --uri "mongodb://$MONGO_HOST:$MONGO_PORT/$DATABASE_NAME" --username $MONGO_USER --password $MONGO_PASS --authenticationDatabase admin $@
+    mongoimport --uri "mongodb://${MONGO_HOST}:${MONGO_PORT}/${DATABASE_NAME}" --username "${MONGO_USER}" --password "${MONGO_PASS}" --authenticationDatabase admin "$@"
 }
 
 # Helper function to call mongosh
 _mongosh() {
-    mongosh "$MONGO_HOST:$MONGO_PORT/$DATABASE_NAME" --username $MONGO_USER --password $MONGO_PASS --authenticationDatabase admin $@
+    mongosh "${MONGO_HOST}:${MONGO_PORT}/${DATABASE_NAME}" --username "${MONGO_USER}" --password "${MONGO_PASS}" --authenticationDatabase admin "$@"
 }

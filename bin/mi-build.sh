@@ -25,13 +25,13 @@ SCRIPT_DIR=$(dirname "${SCRIPT_PATH}")
 
 
 # Include functions
-source "$SCRIPT_DIR/include.functions.sh"
+source "${SCRIPT_DIR}/include.functions.sh"
 
 
 # Function to display the banner
 display_banner() {
     _log "------------------------------------------"
-    _log "- Mongo-Initializr - DbData Import       "
+    _log "- Mongo-Initializr - DbData Import        "
     _log "------------------------------------------"
     _log
 }
@@ -41,11 +41,11 @@ display_help() {
     _log
     _log "Usage: $(basename -- $0) [OPTIONS]"
     _log "Options:"
-    _log "  -i, --input-file [arg]        Specify input file (default: $DEFAULT_INPUT_FILE)"
-    _log "  -d, --data-folder [arg]       Specify data folder (default: $DEFAULT_DATA_FOLDER)"
+    _log "  -i, --input-file [arg]        Specify input file (default: ${DEFAULT_INPUT_FILE})"
+    _log "  -d, --data-folder [arg]       Specify data folder (default: ${DEFAULT_DATA_FOLDER})"
     _log
-    _log "      --mongo-hostname [arg]    Specify MongoDB hostname (default: $DEFAULT_MONGO_HOST)"
-    _log "      --mongo-port [arg]        Specify MongoDB port (default: $DEFAULT_MONGO_PORT)"
+    _log "      --mongo-hostname [arg]    Specify MongoDB hostname (default: ${DEFAULT_MONGO_HOST})"
+    _log "      --mongo-port [arg]        Specify MongoDB port (default: ${DEFAULT_MONGO_PORT})"
     _log "      --mongo-username [arg]    Specify MongoDB username"
     _log "      --mongo-password [arg]    Specify MongoDB password"
     _log
@@ -59,7 +59,7 @@ display_help() {
 # Function to parse command line arguments
 parse_arguments() {
     while [[ $# -gt 0 ]]; do
-        case "$1" in
+        case "${1}" in
             -i|--input-file)
                 INPUT_FILE="$2"
                 shift 2
@@ -97,7 +97,7 @@ parse_arguments() {
                 display_help
                 ;;
             *)
-                _log "Unknown option: $1"
+                _log "Unknown option: ${1}"
                 display_help
                 ;;
         esac
@@ -107,20 +107,20 @@ parse_arguments() {
 # Function for validating the command line arguments
 validate_arguments() {
     # Check if all mongo settings are set
-    if [ -z "$MONGO_USER" ] || [ -z "$MONGO_PASS" ]; then
+    if [[ -z "${MONGO_USER}" ]] || [[ -z "${MONGO_PASS}" ]]; then
         _log "Error: Mongo credentials are required."
         display_help
     fi
 
-    # Check if database-version is set
-    if [ -z "$DATABASE_NAME" ] || [ -z "$DATABASE_VERSION" ]; then
+    # Check if database-name / -version are set
+    if [[ -z "${DATABASE_NAME}" ]] || [[ -z "${DATABASE_VERSION}" ]]; then
         _log "Error: Database name and version are required."
         display_help
     fi
 
     # Check if initdb input file exists
-    if [ ! -e "$INPUT_FILE" ]; then
-        _log "Error: The input file '$INPUT_FILE' does not exist."
+    if [[ ! -f "${INPUT_FILE}" ]]; then
+        _log "Error: The input file '${INPUT_FILE}' does not exist."
         display_help
     fi
 }
@@ -132,27 +132,27 @@ clean_database() {
 
 # Function to add handle all entries in the input file
 handle_input_file() {
-    jq -c '.[]' "$INPUT_FILE" | while read object; do
-        collection=$(echo "$object" | jq -r .collection)
-        path=$(echo "$object" | jq -r .path)
+    jq -c '.[]' "${INPUT_FILE}" | while read object; do
+        local collection=$(jq -r .collection <<< "${object}")
+        local path=$(jq -r .path <<< "${object}")
 
-        add_json_to_collection "$collection" "$path"
+        add_json_to_collection "${collection}" "${path}"
     done
 }
 
 # Function to add JSON data to a collection
 add_json_to_collection() {
-    local collection=$1
-    local filename="${DATA_FOLDER}/$2"
+    local collection=${1}
+    local filename="${DATA_FOLDER}/${2}"
 
-    _log "Processing file '$2'."
+    _log "Processing file '${2}'."
 
     # Check if the JSON filename exists
-    if [ -f "$filename" ]; then
+    if [[ -f "${filename}" ]]; then
         # Add JSON data to the collection. Use mongoimport to create the collection and add data
-        _mongoimport --collection $collection --file $filename --jsonArray --upsert --upsertFields "_id"
+        _mongoimport --collection ${collection} --file $filename --jsonArray --upsert --upsertFields "_id"
 
-        _log "'$filename' is added to '$collection'"
+        _log "'${filename}' is added to '${collection}'"
     else
         _log "Error: JSON file '$filename' not found."
         exit 1
@@ -161,7 +161,7 @@ add_json_to_collection() {
 
 # Function to add the constants to the database
 add_constants() {
-    constants=$(jq -n -c --arg name "$DATABASE_NAME" --arg version "$DATABASE_VERSION" \
+    constants=$(jq -n -c --arg name "${DATABASE_NAME}" --arg version "${DATABASE_VERSION}" \
     '{
       _id: 1,
       database: $ARGS.named
@@ -177,13 +177,13 @@ parse_arguments "$@"
 
 validate_arguments
 
-_log "Clean database '$DATABASE_NAME'"
+_log "Clean database '${DATABASE_NAME}'"
 clean_database
 
-_log "Handle inputfile '$INPUT_FILE'"
+_log "Handle inputfile '${INPUT_FILE}'"
 handle_input_file
 
-_log "Add constants to database '$DATABASE_NAME'"
+_log "Add constants to database '${DATABASE_NAME}'"
 add_constants
 
 _log "Done!"

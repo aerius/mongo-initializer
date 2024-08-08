@@ -3,4 +3,4 @@
 # Exit on error
 set -e
 
-mongo-initializr.sh
+/mongo-initializr.sh

@@ -27,6 +27,6 @@ RUN --mount=type=cache,id=aerius-apt-cache-debian,mode=0755,sharing=locked,targe
 # Copy all necessary scripts
 COPY docker/mongo-initializr.sh /
 COPY docker/docker-entrypoint.sh /
-COPY bin/ "$MI_BIN_FOLDER"
+COPY bin/ "${MI_BIN_FOLDER}"
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
