@@ -132,10 +132,7 @@ clean_database() {
 
 # Function to add handle all entries in the input file
 handle_input_file() {
-    jq -c '.[]' "${INPUT_FILE}" | while read object; do
-        local collection=$(jq -r .collection <<< "${object}")
-        local path=$(jq -r .path <<< "${object}")
-
+    jq -r '.[] | "\(.collection) \(.path)"' "${INPUT_FILE}" | while read collection path; do
         add_json_to_collection "${collection}" "${path}"
     done
 }

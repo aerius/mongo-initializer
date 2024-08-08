@@ -20,9 +20,9 @@ ENV MI_DATABASE_NAME=${MI_DATABASE_NAME:-mongo} \
     MI_SKIP_UNSET_ENVS=${MI_SKIP_UNSET_ENVS:-false}
 
 # Install required packages
-RUN --mount=type=cache,id=aerius-apt-cache-debian,mode=0755,sharing=locked,target=/var/cache/apt \
-    apt-get update \
-    && apt-get install -y wget curl jq
+RUN apt-get update \
+    && apt-get install -y wget curl jq \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy all necessary scripts
 COPY docker/mongo-initializr.sh /
