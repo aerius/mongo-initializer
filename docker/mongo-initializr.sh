@@ -51,8 +51,8 @@ sync_dbdata() {
   : ${HTTPS_DATA_PASSWORD?'HTTPS_DATA_PASSWORD must be provided'}
 
   # Sync dbdata
-  _log "Sync mongo dbdata"
-  "${MI_BIN_FOLDER}/mi-sync.sh" \
+  _log "Sync dbdata files"
+  "${MI_BIN_FOLDER}/mi-dbdata-sync.sh" \
     --input-file "${MI_INPUT_FILE}" \
     --data-folder "${MI_DBDATA_FOLDER}" \
     --nexus-url "${MI_NEXUS_BASE_URL}" \
@@ -61,7 +61,7 @@ sync_dbdata() {
     --nexus-password "${HTTPS_DATA_PASSWORD}"
 }
 
-add_dbdata() {
+import_dbdata() {
   : ${MI_INPUT_FILE?'MI_INPUT_FILE must be provided'}
   : ${MI_DBDATA_FOLDER?'MI_DBDATA_FOLDER must be provided'}
   : ${MI_DATABASE_USERNAME?'MI_DATABASE_USERNAME must be provided'}
@@ -70,8 +70,8 @@ add_dbdata() {
   : ${MI_DATABASE_VERSION?'MI_DATABASE_VERSION must be provided'}
 
   # Build database
-  _log "Build mongo database"
-  "${MI_BIN_FOLDER}/mi-build.sh" \
+  _log "Import dbdata files"
+  "${MI_BIN_FOLDER}/mi-dbdata-import.sh" \
     --input-file "${MI_INPUT_FILE}" \
     --data-folder "${MI_DBDATA_FOLDER}" \
     --mongo-username "${MI_DATABASE_USERNAME}" \
@@ -87,7 +87,7 @@ run_script_runner() {
   : ${MI_RUN_SCRIPT_FOLDER?'MI_RUN_SCRIPT_FOLDER must be provided'}
 
   # Run shell script runner
-  _log "Start mogno shell script runner"
+  _log "Start mongo shell script runner"
   "${MI_BIN_FOLDER}/mi-runner.sh" \
     --mongo-username "${MI_DATABASE_USERNAME}" \
     --mongo-password "${MI_DATABASE_PASSWORD}" \
@@ -151,7 +151,7 @@ if [[ -n "${MI_DATABASE_USERNAME}" ]] && [[ -n "${MI_DATABASE_PASSWORD}" ]]; the
 
     # Add dbdata
     if [[ -n "${MI_DATABASE_NAME}" ]]; then
-      add_dbdata
+      import_dbdata
     else
       _log "MI_DATABASE_NAME is not set. Probably no dbdata add is desired."
     fi
