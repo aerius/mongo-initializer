@@ -4,7 +4,7 @@ Docker image for building MongoDB databases using the `Mongo-Initializr` scripts
 
 ## Docker image
 
-By default the database is initialized on startup of the container using the [docker-entrypoint.sh](docker/docker-entrypoint.sh) script. The behavior of this script can be customized based on the `MI_*`-variables.
+By default the database is initialized on startup of the container using the Docker [ENTRYPOINT](docker/docker-entrypoint.sh) which is executing the [Mongo-Initializer](docker/mongo-initializer.sh) script. The behavior of this script can be customized based on the `MI_*`-variables.
 
 ### Variables
 
@@ -18,10 +18,10 @@ By default the database is initialized on startup of the container using the [do
 * `MI_SOURCE_FOLDER`: The folder where the database sources are located.
 * `MI_DBDATA_FOLDER`: The folder where the dbdata-files are located.
 * `MI_SKIP_DBDATA_SYNC`: Set to `true` if the dbdata sync should be skipped.
-* `MI_SKIP_BIN_FOLDER_CLEANUP`: Set to `true` if the bin-folder should be kept.
-* `MI_SKIP_SOURCE_FOLDER_CLEANUP`: Set to `true` if the source-folder should be kept.
-* `MI_SKIP_DBDATA_FOLDER_CLEANUP`: Set to `true` if the dbdata-folder should be kept.
 * `MI_SKIP_UNSET_ENVS`: Set to `true` if all the `MI_*` environment variables should be kept after the `docker-entrypoint.sh` entrypoint script is runned.
+* `MI_BIN_FOLDER_CLEANUP`: Set to `true` if the bin-folder should be removed.
+* `MI_SOURCE_FOLDER_CLEANUP`: Set to `true` if the source-folder should be removed.
+* `MI_DBDATA_FOLDER_CLEANUP`: Set to `true` if the dbdata-folder should be removed.
 * `HTTPS_DATA_USERNAME`, `HTTPS_DATA_PASSWORD`: The username and password of the nexus repository used for syncing the dbdata-files.
 
 ### Examples of how to use the aerius-mongo-initializr image
@@ -76,9 +76,9 @@ ARG MI_BIN_FOLDER
 ARG MI_SOURCE_FOLDER
 ARG MI_DBDATA_FOLDER
 ARG MI_SKIP_DBDATA_SYNC
-ARG MI_SKIP_BIN_FOLDER_CLEANUP
-ARG MI_SKIP_SOURCE_FOLDER_CLEANUP
-ARG MI_SKIP_DBDATA_FOLDER_CLEANUP
+ARG MI_BIN_FOLDER_CLEANUP
+ARG MI_SOURCE_FOLDER_CLEANUP
+ARG MI_DBDATA_FOLDER_CLEANUP
 ARG MI_SKIP_UNSET_ENVS
 ARG HTTPS_DATA_USERNAME
 ARG HTTPS_DATA_PASSWORD
@@ -94,5 +94,5 @@ RUN /mongo-initializr.sh
 ## Image build
 
 There are two scripts for building the Docker images.
-* `update.sh` Creates the Dockerfile files for the specified Mongo versions.
-* `build_images.sh` Builds all generated Dockerfile files.
+* [`update.sh`](update.sh) - Creates the Dockerfile files for the specified Mongo versions.
+* [`build_images.sh`](build_images.sh) - Builds all generated Dockerfile files.

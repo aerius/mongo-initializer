@@ -97,26 +97,26 @@ run_script_runner() {
 
 _clean_folder() {
   local folder_path=${1}
-  local skip=${2}
+  local cleanup=${2}
 
-  if [[ "${skip}" == "true" ]]; then
-    _log "Skip deleting folder '${INPUT_FILE}{folder_path}'"
-  else
+  if [[ "${cleanup}" == "true" ]]; then
     if [[ -d "${folder_path}" ]]; then
       rm -rf "${folder_path}"
       _log "Folder '${folder_path}' deleted"
     else
       _log "Folder '${folder_path}' does not exists and therefore cannot be deleted."
     fi
+  else
+    _log "Keep folder '${folder_path}'"
   fi
 }
 
 cleanup() {
   _log "Cleanup image"
 
-  _clean_folder ${MI_BIN_FOLDER} ${MI_SKIP_BIN_FOLDER_CLEANUP}
-  _clean_folder ${MI_SOURCE_FOLDER} ${MI_SKIP_SOURCE_FOLDER_CLEANUP}
-  _clean_folder ${MI_DBDATA_FOLDER} ${MI_SKIP_DBDATA_FOLDER_CLEANUP}
+  _clean_folder ${MI_BIN_FOLDER} ${MI_BIN_FOLDER_CLEANUP}
+  _clean_folder ${MI_SOURCE_FOLDER} ${MI_SOURCE_FOLDER_CLEANUP}
+  _clean_folder ${MI_DBDATA_FOLDER} ${MI_DBDATA_FOLDER_CLEANUP}
   
   if [[ "${MI_SKIP_UNSET_ENVS}" == "true" ]]; then
     _log "Skip unsetting all MI-variables"
