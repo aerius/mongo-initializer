@@ -97,7 +97,7 @@ validate_arguments() {
     fi
 
     # Check if initdb input file exists
-    if [[ ! -e "${INPUT_FILE}" ]]; then
+    if [[ ! -f "${INPUT_FILE}" ]]; then
         _log "Error: The input file '${INPUT_FILE}' does not exist."
         display_help
     fi
@@ -140,12 +140,11 @@ sync_file() {
     wget -O "${filename}" --quiet --user="${NEXUS_USERNAME}" --password="${NEXUS_PASSWORD}" "${NEXUS_BASE_URL}/repository/${NEXUS_REPOSITORY}/${path}"
 
     _log "> Downloaded"
+
+    gunzip --keep --force "${filename}"
+
+    _log "> Uncompressed"
   fi
-
-  # Uncompress the archive even if the uncompressed file allready exists
-  gunzip --keep --force "${filename}"
-
-  _log "> Uncompressed"
 }
 
 # Function to add handle all entries in the input file

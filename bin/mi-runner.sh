@@ -108,7 +108,7 @@ validate_arguments() {
     fi
 
     # Check if rin-file exists
-    if [[ ! -e "${RUN_FOLDER}/${RUN_FILE}" ]]; then
+    if [[ ! -f "${RUN_FOLDER}/${RUN_FILE}" ]]; then
         _log "Error: Could not find '${RUN_FILE}' in '${RUN_FOLDER}'."
         display_help
     fi

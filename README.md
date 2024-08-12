@@ -4,7 +4,7 @@ Docker image for building MongoDB databases using the `Mongo-Initializr` scripts
 
 ## Docker image
 
-By default the database is initialized on startup of the container using the Docker [ENTRYPOINT](docker/docker-entrypoint.sh) which is executing the [Mongo-Initializer](docker/mongo-initializer.sh) script. The behavior of this script can be customized based on the `MI_*`-variables.
+By default the database is initialized on startup of the container using the Docker [ENTRYPOINT](docker/docker-entrypoint.sh) which is executing the [Mongo-Initializr](docker/mongo-initializr.sh) script. The behavior of this script can be customized based on the `MI_*`-variables.
 
 ### Variables
 
