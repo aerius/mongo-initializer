@@ -13,35 +13,6 @@ _log() {
     echo -e "\033[0;32m[$(date '+%Y-%m-%d %H:%M:%S')] $@\033[0m"
 }
 
-init_database() {
-  : ${MI_DATABASE_USERNAME?'MI_DATABASE_USERNAME must be provided'}
-  : ${MI_DATABASE_PASSWORD?'MI_DATABASE_PASSWORD must be provided'}
-
-  _log "Start mongod"
-  mongod \
-    --quiet \
-    --fork \
-    --logpath /var/log/mongodb.log \
-    --dbpath /data/db/ \
-    --bind_ip_all
-
-  # Wait until mongod is up
-  until mongosh --eval "db.adminCommand('ping')" >/dev/null 2>&1; do
-    sleep 0.5s
-  done
-
-  # Create the AERIUS user in admin database
-  # Add void to supress the --eval output
-  _log "Create user '${MI_DATABASE_USERNAME}'"
-  mongosh admin --quiet --eval " \
-    void \
-    db.createUser({ \
-      user: '${MI_DATABASE_USERNAME}', \
-      pwd: '${MI_DATABASE_PASSWORD}', \
-      roles: [{ role: 'root', db: 'admin' }] \
-    })"
-}
-
 sync_dbdata() {
   : ${MI_INPUT_FILE?'MI_INPUT_FILE must be provided'}
   : ${MI_DBDATA_FOLDER?'MI_DBDATA_FOLDER must be provided'}
@@ -136,9 +107,6 @@ cleanup() {
 
 # Check if init and build are desired
 if [[ -n "${MI_DATABASE_USERNAME}" ]] && [[ -n "${MI_DATABASE_PASSWORD}" ]]; then
-  
-  # Init database
-  init_database
   
   if [[ -n "${MI_INPUT_FILE}" ]]; then
 
