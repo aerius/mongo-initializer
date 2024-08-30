@@ -35,9 +35,9 @@ sync_dbdata() {
 import_dbdata() {
   : ${MI_INPUT_FILE?'MI_INPUT_FILE must be provided'}
   : ${MI_DBDATA_FOLDER?'MI_DBDATA_FOLDER must be provided'}
-  : ${MI_DATABASE_USERNAME?'MI_DATABASE_USERNAME must be provided'}
-  : ${MI_DATABASE_PASSWORD?'MI_DATABASE_PASSWORD must be provided'}
-  : ${MI_DATABASE_NAME?'MI_DATABASE_NAME must be provided'}
+  : ${MONGO_INITDB_ROOT_USERNAME?'MONGO_INITDB_ROOT_USERNAME must be provided'}
+  : ${MONGO_INITDB_ROOT_PASSWORD?'MONGO_INITDB_ROOT_PASSWORD must be provided'}
+  : ${MONGO_INITDB_DATABASE?'MONGO_INITDB_DATABASE must be provided'}
   : ${MI_DATABASE_VERSION?'MI_DATABASE_VERSION must be provided'}
 
   # Build database
@@ -45,24 +45,24 @@ import_dbdata() {
   "${MI_BIN_FOLDER}/mi-dbdata-import.sh" \
     --input-file "${MI_INPUT_FILE}" \
     --data-folder "${MI_DBDATA_FOLDER}" \
-    --mongo-username "${MI_DATABASE_USERNAME}" \
-    --mongo-password "${MI_DATABASE_PASSWORD}" \
-    --database-name "${MI_DATABASE_NAME}" \
+    --mongo-username "${MONGO_INITDB_ROOT_USERNAME}" \
+    --mongo-password "${MONGO_INITDB_ROOT_PASSWORD}" \
+    --database-name "${MONGO_INITDB_DATABASE}" \
     --database-version "${MI_DATABASE_VERSION}"
 }
 
 run_script_runner() {
-  : ${MI_DATABASE_USERNAME?'MI_DATABASE_USERNAME must be provided'}
-  : ${MI_DATABASE_PASSWORD?'MI_DATABASE_PASSWORD must be provided'}
-  : ${MI_DATABASE_NAME?'MI_DATABASE_NAME must be provided'}
+  : ${MONGO_INITDB_ROOT_USERNAME?'MONGO_INITDB_ROOT_USERNAME must be provided'}
+  : ${MONGO_INITDB_ROOT_PASSWORD?'MONGO_INITDB_ROOT_PASSWORD must be provided'}
+  : ${MONGO_INITDB_DATABASE?'MONGO_INITDB_DATABASE must be provided'}
   : ${MI_RUN_SCRIPT_FOLDER?'MI_RUN_SCRIPT_FOLDER must be provided'}
 
   # Run shell script runner
   _log "Start mongo shell script runner"
   "${MI_BIN_FOLDER}/mi-runner.sh" \
-    --mongo-username "${MI_DATABASE_USERNAME}" \
-    --mongo-password "${MI_DATABASE_PASSWORD}" \
-    --database-name "${MI_DATABASE_NAME}" \
+    --mongo-username "${MONGO_INITDB_ROOT_USERNAME}" \
+    --mongo-password "${MONGO_INITDB_ROOT_PASSWORD}" \
+    --database-name "${MONGO_INITDB_DATABASE}" \
     --run-folder "${MI_RUN_SCRIPT_FOLDER}"
 }
 
@@ -106,7 +106,7 @@ cleanup() {
 #####################
 
 # Check if init and build are desired
-if [[ -n "${MI_DATABASE_USERNAME}" ]] && [[ -n "${MI_DATABASE_PASSWORD}" ]]; then
+if [[ -n "${MONGO_INITDB_ROOT_USERNAME}" ]] && [[ -n "${MONGO_INITDB_ROOT_PASSWORD}" ]]; then
   
   if [[ -n "${MI_INPUT_FILE}" ]]; then
 
@@ -118,10 +118,10 @@ if [[ -n "${MI_DATABASE_USERNAME}" ]] && [[ -n "${MI_DATABASE_PASSWORD}" ]]; the
     fi
 
     # Add dbdata
-    if [[ -n "${MI_DATABASE_NAME}" ]]; then
+    if [[ -n "${MONGO_INITDB_DATABASE}" ]]; then
       import_dbdata
     else
-      _log "MI_DATABASE_NAME is not set. Probably no dbdata add is desired."
+      _log "MONGO_INITDB_DATABASE is not set. Probably no dbdata add is desired."
     fi
 
   else
@@ -136,8 +136,9 @@ if [[ -n "${MI_DATABASE_USERNAME}" ]] && [[ -n "${MI_DATABASE_PASSWORD}" ]]; the
   fi
   
 else
-  _log "MI_DATABASE_USERNAME or MI_DATABASE_PASSWORD is not set. Probably no init and build is desired."
+  _log "MONGO_INITDB_ROOT_USERNAME or MONGO_INITDB_ROOT_PASSWORD is not set. Probably no init and build is desired."
 fi
 
 # Cleanup folders and ENV'S
 cleanup
+

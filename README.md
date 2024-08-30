@@ -8,10 +8,10 @@ The database is initialized on startup of the container using the Docker [ENTRYP
 
 ### Variables
 
-* `MI_DATABASE_USERNAME`, `MI_DATABASE_PASSWORD`: Username and password used for initializing and building the database. If set an admin user is created in the `admin` database.
+* `MONGO_INITDB_ROOT_USERNAME`, `MONGO_INITDB_ROOT_PASSWORD`: Username and password used for initializing and building the database (both default set to aerius).
+* `MONGO_INITDB_DATABASE`: The name of the database to initialize (default set to mongo).
 * `MI_INPUT_FILE`: The file which contains a list of dbdata-files and the corresponding database collection. If set the build and sync are executed.
 * `MI_NEXUS_BASE_URL`, `MI_NEXUS_REPOSITORY`: The base-url and nexus repository where the dbdata-files are located.
-* `MI_DATABASE_NAME`: The name of the database to initialize. If set all the `MI_INPUT_FILE`-files are added to the database.
 * `MI_DATABASE_VERSION`: The version of the database, which will be added to the database constants. 
 * `MI_RUN_SCRIPT_FOLDER`: The folder there the `_run.js` file is located. If *not* set, the runner wil *not* be executed.
 * `MI_SKIP_DBDATA_SYNC`: Set to `true` if the dbdata sync should be skipped.
@@ -31,9 +31,9 @@ docker run \
 	-v /projects/example-project/git/example-project/:/mi/source \
 	-e MI_INPUT_FILE="/mi/source/example-project/src/data/initdb.json" \
 	-e MI_RUN_SCRIPT_FOLDER="/mi/source/example-project/src/main" \
-	-e MI_DATABASE_NAME=example \
+	-e MONGO_INITDB_DATABASE=example \
 	-e MI_DATABASE_VERSION=0.0.1 \
-	-e MI_NEXUS_BASE_URL=https://nexus.aerius.nl \
+	-e MI_NEXUS_BASE_URL=https://nexus.example-project.nl \
 	-e MI_NEXUS_REPOSITORY=dbdata \
 	-e HTTPS_DATA_USERNAME=${HTTPS_DATA_USERNAME} \
 	-e HTTPS_DATA_PASSWORD=${HTTPS_DATA_PASSWORD} \
@@ -50,7 +50,7 @@ docker run \
 	-v /projects/example-project/dbdata/:/mi/dbdata \
 	-e MI_INPUT_FILE="/mi/source/example-project/src/data/initdb.json" \
 	-e MI_RUN_SCRIPT_FOLDER="/mi/source/example-project/src/main" \
-	-e MI_DATABASE_NAME=example \
+	-e MONGO_INITDB_DATABASE=example \
 	-e MI_DATABASE_VERSION=0.0.1 \
 	-e MI_SKIP_DBDATA_SYNC=true \
 	aerius-mongo-initializr:0.1-SNAPSHOT-7.0.6
