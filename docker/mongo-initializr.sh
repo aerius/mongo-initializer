@@ -5,6 +5,8 @@ set -e
 
 : ${MI_BIN_FOLDER?'MI_BIN_FOLDER must be provided'}
 
+MI_DUMP_FOLDER="/mi/dump"
+
 #################
 ### Functions ###
 #################
@@ -66,6 +68,71 @@ run_script_runner() {
     --run-folder "${MI_RUN_SCRIPT_FOLDER}"
 }
 
+create_dump() {
+  : ${MONGO_INITDB_ROOT_USERNAME?'MONGO_INITDB_ROOT_USERNAME must be provided'}
+  : ${MONGO_INITDB_ROOT_PASSWORD?'MONGO_INITDB_ROOT_PASSWORD must be provided'}
+  : ${MONGO_INITDB_DATABASE?'MONGO_INITDB_DATABASE must be provided'}
+  : ${MI_DATABASE_VERSION?'MI_DATABASE_VERSION must be provided'}
+
+  mkdir -p "${MI_DUMP_FOLDER}"
+
+  local path="${MI_DUMP_FOLDER}/${MONGO_INITDB_DATABASE}_${MI_DATABASE_VERSION}.dump.gz"
+
+  _log "Backup database"
+  mongodump \
+    --username="${MONGO_INITDB_ROOT_USERNAME}" \
+    --password="${MONGO_INITDB_ROOT_PASSWORD}" \
+    --authenticationDatabase="admin" \
+    --gzip \
+    --archive=${path}
+
+  if [ $? -eq 0 ]; then
+    _log "Database '${MONGO_INITDB_DATABASE}' dumped as '${path}'"
+  else
+    _log "Failed to dump the database '${MONGO_INITDB_DATABASE}'."
+    exit 1
+  fi
+}
+
+restore_dumps() {
+  : ${MONGO_INITDB_ROOT_USERNAME?'MONGO_INITDB_ROOT_USERNAME must be provided'}
+  : ${MONGO_INITDB_ROOT_PASSWORD?'MONGO_INITDB_ROOT_PASSWORD must be provided'}
+  : ${MONGO_INITDB_DATABASE?'MONGO_INITDB_DATABASE must be provided'}
+
+  if [[ -d  "${MI_DUMP_FOLDER}" ]]; then
+    local dump_files=$(find "${MI_DUMP_FOLDER}" -name "*.dump.gz")
+
+    # Restore all *.dump.gz files found
+    _log "Restore database dump(s)."
+    for dump_file in $dump_files; do
+      _log "Restoring '$dump_file'."
+      mongorestore \
+        --username="${MONGO_INITDB_ROOT_USERNAME}" \
+        --password="${MONGO_INITDB_ROOT_PASSWORD}" \
+        --authenticationDatabase="admin" \
+        --gzip \
+        --archive=${dump_file}
+
+      if [ $? -eq 0 ]; then
+        _log "Restored '$dump_file'."
+      else
+        _log "Failed to restore '$dump_file'."
+        exit 1
+      fi
+
+      rm $dump_file
+      _log "Removed '$dump_file'."
+    done
+  else
+    _log "No dump folder '${MI_DUMP_FOLDER}' found."
+  fi
+}
+
+shutdown_mongo() {
+  _log "Shuwdown mongod (after 5 seconds in the background so the docker-entrypoint can exit)."
+  sleep 5 && mongod --shutdown &
+}
+
 _clean_folder() {
   local folder_path=${1}
   local cleanup=${2}
@@ -108,6 +175,8 @@ cleanup() {
 # Check if init and build are desired
 if [[ -n "${MONGO_INITDB_ROOT_USERNAME}" ]] && [[ -n "${MONGO_INITDB_ROOT_PASSWORD}" ]]; then
   
+  restore_dumps
+
   if [[ -n "${MI_INPUT_FILE}" ]]; then
 
     # Sync dbdata
@@ -121,24 +190,32 @@ if [[ -n "${MONGO_INITDB_ROOT_USERNAME}" ]] && [[ -n "${MONGO_INITDB_ROOT_PASSWO
     if [[ -n "${MONGO_INITDB_DATABASE}" ]]; then
       import_dbdata
     else
-      _log "MONGO_INITDB_DATABASE is not set. Probably no dbdata add is desired."
+      _log "MONGO_INITDB_DATABASE is not set. Probably no dbdata import is desired."
     fi
 
   else
-    _log "MI_INPUT_FILE is not set. Probably no dbdata sync and build is desired."
+    _log "MI_INPUT_FILE is not set. Probably no dbdata sync and import is desired."
   fi
 
   # Run script runner
   if [[ -n "${MI_RUN_SCRIPT_FOLDER}" ]]; then
       run_script_runner
   else
-    _log "MI_RUN_SCRIPT_FOLDER is not set. Probably no script runner run is desired."
+    _log "MI_RUN_SCRIPT_FOLDER is not set. Probably no run of the script runner is desired."
   fi
-  
+
+  if [[ "${MI_DUMP_DATABASE}" == true ]]; then
+    create_dump
+  fi
+
+  if [[ "${MI_INITIALIZE_ON_BUILD}" == true ]]; then
+    create_dump
+    shutdown_mongo
+  fi
+
 else
   _log "MONGO_INITDB_ROOT_USERNAME or MONGO_INITDB_ROOT_PASSWORD is not set. Probably no init and build is desired."
 fi
 
 # Cleanup folders and ENV'S
 cleanup
-
