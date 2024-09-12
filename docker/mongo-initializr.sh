@@ -204,12 +204,11 @@ if [[ -n "${MONGO_INITDB_ROOT_USERNAME}" ]] && [[ -n "${MONGO_INITDB_ROOT_PASSWO
     _log "MI_RUN_SCRIPT_FOLDER is not set. Probably no run of the script runner is desired."
   fi
 
-  if [[ "${MI_DUMP_DATABASE}" == true ]]; then
+  if [[ "${MI_INITIALIZE_ON_BUILD}" == true || "${MI_DUMP_DATABASE}" == true ]]; then
     create_dump
   fi
 
   if [[ "${MI_INITIALIZE_ON_BUILD}" == true ]]; then
-    create_dump
     shutdown_mongo
   fi
 
