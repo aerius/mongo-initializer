@@ -84,7 +84,7 @@ create_dump() {
     --password="${MONGO_INITDB_ROOT_PASSWORD}" \
     --authenticationDatabase="admin" \
     --gzip \
-    --archive=${path}
+    --archive="${path}"
 
   if [ $? -eq 0 ]; then
     _log "Database '${MONGO_INITDB_DATABASE}' dumped as '${path}'"
@@ -94,7 +94,7 @@ create_dump() {
   fi
 }
 
-restore_dumps() {
+restore_dumps_if_exists() {
   : ${MONGO_INITDB_ROOT_USERNAME?'MONGO_INITDB_ROOT_USERNAME must be provided'}
   : ${MONGO_INITDB_ROOT_PASSWORD?'MONGO_INITDB_ROOT_PASSWORD must be provided'}
   : ${MONGO_INITDB_DATABASE?'MONGO_INITDB_DATABASE must be provided'}
@@ -111,7 +111,7 @@ restore_dumps() {
         --password="${MONGO_INITDB_ROOT_PASSWORD}" \
         --authenticationDatabase="admin" \
         --gzip \
-        --archive=${dump_file}
+        --archive="${dump_file}"
 
       if [ $? -eq 0 ]; then
         _log "Restored '$dump_file'."
@@ -173,9 +173,9 @@ cleanup() {
 #####################
 
 # Check if init and build are desired
-if [[ -n "${MONGO_INITDB_ROOT_USERNAME}" ]] && [[ -n "${MONGO_INITDB_ROOT_PASSWORD}" ]]; then
+if [[ -n "${MONGO_INITDB_ROOT_USERNAME}" ]] && [[ -n "${MONGO_INITDB_ROOT_PASSWORD}" ]] && [[ -n "${MONGO_INITDB_DATABASE}" ]]; then
   
-  restore_dumps
+  restore_dumps_if_exists
 
   if [[ -n "${MI_INPUT_FILE}" ]]; then
 
@@ -186,13 +186,8 @@ if [[ -n "${MONGO_INITDB_ROOT_USERNAME}" ]] && [[ -n "${MONGO_INITDB_ROOT_PASSWO
       sync_dbdata
     fi
 
-    # Add dbdata
-    if [[ -n "${MONGO_INITDB_DATABASE}" ]]; then
-      import_dbdata
-    else
-      _log "MONGO_INITDB_DATABASE is not set. Probably no dbdata import is desired."
-    fi
-
+    import_dbdata
+    
   else
     _log "MI_INPUT_FILE is not set. Probably no dbdata sync and import is desired."
   fi
@@ -213,7 +208,7 @@ if [[ -n "${MONGO_INITDB_ROOT_USERNAME}" ]] && [[ -n "${MONGO_INITDB_ROOT_PASSWO
   fi
 
 else
-  _log "MONGO_INITDB_ROOT_USERNAME or MONGO_INITDB_ROOT_PASSWORD is not set. Probably no init and build is desired."
+  _log "MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD and/or MONGO_INITDB_DATABASE is not set. Probably no init and build is desired."
 fi
 
 # Cleanup folders and ENV'S

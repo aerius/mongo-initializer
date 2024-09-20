@@ -107,17 +107,17 @@ Note: the Mongo docker-entrypoint will not initialize the database again if ther
 #syntax = docker/dockerfile:1
 FROM aerius-mongo-initializr:0.1-SNAPSHOT-7.0.6 
 
-ARG MONGO_INITDB_DATABASE=example-project
-ARG MONGO_INITDB_ROOT_USERNAME=example
-ARG MONGO_INITDB_ROOT_PASSWORD=passwd
-ARG MI_DATABASE_VERSION=0.01
-ARG MI_INPUT_FILE="/mi/source/example-project/src/data/initdb.json"
-ARG MI_RUN_SCRIPT_FOLDER="/mi/source/example-project/src/main"
-ARG MI_INITIALIZE_ON_BUILD=true
-ARG MI_NEXUS_BASE_URL="https://nexus.example-project.com"
-ARG MI_NEXUS_REPOSITORY=dbdata
-ARG HTTPS_DATA_USERNAME
-ARG HTTPS_DATA_PASSWORD
+ARG MONGO_INITDB_DATABASE=example-project \
+	MONGO_INITDB_ROOT_USERNAME=example \
+	MONGO_INITDB_ROOT_PASSWORD=passwd \
+	MI_DATABASE_VERSION=0.01 \
+	MI_INPUT_FILE="/mi/source/example-project/src/data/initdb.json" \
+	MI_RUN_SCRIPT_FOLDER="/mi/source/example-project/src/main" \
+	MI_INITIALIZE_ON_BUILD=true \
+	MI_NEXUS_BASE_URL="https://nexus.example-project.com" \
+	MI_NEXUS_REPOSITORY=dbdata \
+	HTTPS_DATA_USERNAME \
+	HTTPS_DATA_PASSWORD
 
 # Copy all necessary scripts
 COPY ./source /mi/source
