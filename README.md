@@ -98,7 +98,7 @@ docker run \
     example-project:latest
 ```
 
-Note: the Mongo docker-entrypoint will not initialize the database again if there is a knwon path in the dbPath folder. See the  Mongo `docker-entrypoint`.
+Note: the Mongo docker-entrypoint will not initialize the database again if there is a known path in the dbPath folder. See the  Mongo `docker-entrypoint`.
 
 <br>
 
