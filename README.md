@@ -31,7 +31,7 @@ By default the database is initialized on startup of the container using the Doc
 
 ### Examples of how to use the aerius-mongo-initializr image
 
-Initialize the example-project database using a Docker run.
+#### Initialize the example-project database using a Docker run.
 ``` bash
 docker run \
 	--name example-project \
@@ -40,7 +40,7 @@ docker run \
 	--env MI_RUN_SCRIPT_FOLDER="/mi/source/example-project/src/main" \
 	--env MONGO_INITDB_DATABASE=example \
 	--env MI_DATABASE_VERSION=0.0.1 \
-	--env MI_NEXUS_BASE_URL=https://nexus.example-project.nl \
+	--env MI_NEXUS_BASE_URL=https://nexus.example-project.com \
 	--env MI_NEXUS_REPOSITORY=dbdata \
 	--env HTTPS_DATA_USERNAME=${HTTPS_DATA_USERNAME} \
 	--env HTTPS_DATA_PASSWORD=${HTTPS_DATA_PASSWORD} \
@@ -49,7 +49,7 @@ docker run \
 
 <br>
 
-Example-project-database with local dbdata files using a Docker run.
+#### Initialize the example-project database with local dbdata files using a Docker run.
 ``` bash
 docker run \
 	--name example-project \
@@ -65,26 +65,57 @@ docker run \
 
 <br>
 
-Dockerfile for initializing the database during the Docker build.
+#### Dockerfile containing all the information to be able to initialize the example-project database on startup of the container.
 ```bash
 #syntax = docker/dockerfile:1
 FROM aerius-mongo-initializr:0.1-SNAPSHOT-7.0.6 
 
-ARG MONGO_INITDB_DATABASE
-ARG MONGO_INITDB_ROOT_USERNAME
-ARG MONGO_INITDB_ROOT_PASSWORD
-ARG MI_DATABASE_VERSION
-ARG MI_INPUT_FILE=${MI_INPUT_FILE:-"/mi/source/database-depositions/src/data/initdb.json"}
-ARG MI_RUN_SCRIPT_FOLDER=${MI_RUN_SCRIPT_FOLDER:-"/mi/source/database-depositions/src/main"}
-ARG MI_DUMP_DATABASE
+ENV MONGO_INITDB_DATABASE=example \
+    MONGO_INITDB_ROOT_USERNAME=example \
+    MONGO_INITDB_ROOT_PASSWORD=passwd \
+    MI_DATABASE_VERSION=0.01 \
+    MI_INPUT_FILE="/mi/source/example-project/src/data/initdb.json" \
+    MI_RUN_SCRIPT_FOLDER="/mi/source/example-project/src/main" \
+    MI_INITIALIZE_ON_BUILD=false \
+    MI_NEXUS_BASE_URL="https://nexus.example-project.com" \
+    MI_NEXUS_REPOSITORY=dbdata
+
+# Copy all necessary scripts
+COPY ./source /mi/source
+```
+
+```bash
+docker build --tag example-project .
+```
+
+```bash
+docker run \
+    --name example-project \
+    --volume ./data:/data/db \
+    --publish 27017:27017 \
+    --env HTTPS_DATA_USERNAME=user \
+    --env HTTPS_DATA_PASSWORD=passwd \
+    example-project:latest
+```
+
+Note: the Mongo docker-entrypoint will not initialize the database again if there is a knwon path in the dbPath folder. See the  Mongo `docker-entrypoint`.
+
+<br>
+
+#### Dockerfile to initialize the example-project database during the Docker build.
+```bash
+#syntax = docker/dockerfile:1
+FROM aerius-mongo-initializr:0.1-SNAPSHOT-7.0.6 
+
+ARG MONGO_INITDB_DATABASE=example-project
+ARG MONGO_INITDB_ROOT_USERNAME=example
+ARG MONGO_INITDB_ROOT_PASSWORD=passwd
+ARG MI_DATABASE_VERSION=0.01
+ARG MI_INPUT_FILE="/mi/source/example-project/src/data/initdb.json"
+ARG MI_RUN_SCRIPT_FOLDER="/mi/source/example-project/src/main"
 ARG MI_INITIALIZE_ON_BUILD=true
-ARG MI_NEXUS_BASE_URL
-ARG MI_NEXUS_REPOSITORY
-ARG MI_SKIP_DBDATA_SYNC
-ARG MI_SKIP_BIN_FOLDER_CLEANUP
-ARG MI_SKIP_SOURCE_FOLDER_CLEANUP
-ARG MI_SKIP_DBDATA_FOLDER_CLEANUP
-ARG MI_SKIP_UNSET_ENVS
+ARG MI_NEXUS_BASE_URL="https://nexus.example-project.com"
+ARG MI_NEXUS_REPOSITORY=dbdata
 ARG HTTPS_DATA_USERNAME
 ARG HTTPS_DATA_PASSWORD
 
