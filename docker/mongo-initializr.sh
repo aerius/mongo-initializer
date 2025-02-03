@@ -20,8 +20,8 @@ sync_dbdata() {
   : ${MI_DBDATA_FOLDER?'MI_DBDATA_FOLDER must be provided'}
   : ${MI_NEXUS_BASE_URL?'MI_NEXUS_BASE_URL must be provided'}
   : ${MI_NEXUS_REPOSITORY?'MI_NEXUS_REPOSITORY must be provided'}
-  : ${MI_HTTPS_DATA_USERNAME?'MI_HTTPS_DATA_USERNAME must be provided'}
-  : ${MI_HTTPS_DATA_PASSWORD?'MI_HTTPS_DATA_PASSWORD must be provided'}
+  : ${HTTPS_DATA_USERNAME?'HTTPS_DATA_USERNAME must be provided'}
+  : ${HTTPS_DATA_PASSWORD?'HTTPS_DATA_PASSWORD must be provided'}
 
   # Sync dbdata
   _log "Sync dbdata files"
@@ -30,8 +30,8 @@ sync_dbdata() {
     --data-folder "${MI_DBDATA_FOLDER}" \
     --nexus-url "${MI_NEXUS_BASE_URL}" \
     --nexus-repo "${MI_NEXUS_REPOSITORY}" \
-    --nexus-username "${MI_HTTPS_DATA_USERNAME}" \
-    --nexus-password "${MI_HTTPS_DATA_PASSWORD}"
+    --nexus-username "${HTTPS_DATA_USERNAME}" \
+    --nexus-password "${HTTPS_DATA_PASSWORD}"
 }
 
 import_dbdata() {
