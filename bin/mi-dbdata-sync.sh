@@ -137,7 +137,7 @@ sync_file() {
     # Make sure directory exists
     mkdir -p "$(dirname "${filename}")"
 
-    wget -O "${filename}" --quiet --user="${NEXUS_USERNAME}" --password="${NEXUS_PASSWORD}" "${NEXUS_BASE_URL}/repository/${NEXUS_REPOSITORY}/${path}"
+    wget -O "${filename}" --no-verbose --user="${NEXUS_USERNAME}" --password="${NEXUS_PASSWORD}" "${NEXUS_BASE_URL}/repository/${NEXUS_REPOSITORY}/${path}"
 
     _log "> Downloaded"
 
